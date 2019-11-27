@@ -1,0 +1,178 @@
+# Packages Download
+import pandas as pd
+import matplotlib.pyplot as plt
+import re
+import konlpy
+from konlpy.tag import Okt
+from tensorflow.keras.preprocessing.text import Tokenizer
+import numpy as np
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+import os
+import warnings
+import tensorflow as tf
+
+# ignore set
+warnings.filterwarnings(action='ignore')
+old_v = tf.logging.get_verbosity()
+tf.logging.set_verbosity(tf.logging.ERROR)
+
+# os set
+os.getcwd()
+
+
+# install package
+import pandas as pd
+import numpy as np
+
+# road data
+movie = pd.read_csv(R"C:\Users\heon1\Desktop\kobis_join.csv", encoding='UTF-8')
+movie.columns
+
+# data view
+movie.describe()
+movie.shape
+movie.isna().sum()
+
+
+##1.	categorical 변수에 대해서, 카테고리가 너무 많다면 cluster로 조금 줄여줘
+##2.	nomical 변수에 대해서 고려해야할 방안
+##  i.	 correlation을 통해서 중복성있는 데이터 삭제
+##  ii.	양으로 할지 증감율로 할지.
+##  iii.	Scale 조정 방법
+##3.	Na 처리
+##4.	개봉일부터 2주차까지 짜르기
+##개봉일이 없다면 그냥 2주까지만 남기기
+
+
+# category 정리하기
+print(movie.head(5))
+movie.columns
+
+dummycolumns = ['외국영화', '영화구분', '관람등급', '장르', '배급사', '수입사', '제작사', '감독']
+dups_count2 = movie.pivot_table(index=['외국영화'], aggfunc='size')
+movie['외국영화'].isna().sum()
+len(dups_count2)
+print(dups_count2, "na %9d" %movie['외국영화'].isna().sum(),sep='\n')
+
+for dim in dummycolumns : #개별 숫자까지 보는법
+    dups_count2 = movie.pivot_table(index=[dim], aggfunc='size')
+    print(dups_count2,"na %9d" %movie[dim].isna().sum(),  sep='\n')
+
+for dim in dummycolumns : #칼럼 별 숫자만 보는법
+    dups_count2 = movie.pivot_table(index=[dim], aggfunc='size')
+    print(dim , " : ", len(dups_count2))
+
+
+
+for dim in dummycolumns:
+    movie.dim.isna().sum()
+
+b = movie['외국영화'].astype("category")
+b.cat.categories
+
+
+
+# 1주일 이하 버리기 - 인덱스 수가 7이하인거 삭제
+# 인덱스 중복 수 세고
+dups_count = movie.pivot_table(index=['movie_id.x.i.'], aggfunc='size')
+print(dups_count.sort())
+
+dups_count.sort_values()
+
+# 여기서 7이하인거는 그 인덱스 삭제
+for i in range(len(movie)) :
+    if movie.loc[i, 'movie_id.x.i.'] in dups_count:
+        del movie[i, 'movie_id.x.i.']
+    else :
+        pass
+
+# how can we find 개봉일? # 1. 전날 대비 엄청 상승? or 좌석 점유율?
+
+## 4.	개봉일부터 2주차까지 짜르기
+## 개봉일이 없다면 그냥 2주까지만 남기기
+
+# 영화에 가서 그 영화 인덱스를 잡고 개봉날을 확인해 개봉날에서 14일이 넘어가는날이면 삭제해라
+# 만약 개봉일 있으면 14일치, 없으면 그냥
+
+# 날짜 자르는거 가능한지 먼저 체크
+from datetime import datetime, timedelta
+movie['날짜'] = pd.to_datetime(movie['날짜'])
+movie['개봉일'] = pd.to_datetime(movie['개봉일'])
+
+movie.loc[0, '날짜'] + timedelta(days=14)
+
+movie.columns
+
+movie.loc[len(movie)-1,]
+
+if movie.loc[0, '개봉일'] is not None:
+    print("goood")
+else:
+    print("shit")
+if movie.loc[0, '개봉일'] is None:
+    movie.loc[0, "개봉일"] = movie.loc[i, "날짜"]
+    # 다음꺼랑 영화 인덱스가 같으면, 앞에 개봉일을 넣어줄까?
+# na인 곳에 개봉일을 먼저 만들어주자
+for i in range(len(movie)) :
+    if 개봉일이 없으면 개봉일 만들어주고
+        if 내일과 전날의 영화인덱스가 같으면
+            추가해줘
+
+movie.loc[21, '날짜'] > movie.loc[21, '개봉일'] + timedelta(days=14)
+movie2 = pd.DataFrame()
+movie2 = movie2.append(movie.loc[13])
+movie2.append(movie.loc[2])
+movie2
+movie.drop
+movie3 = movie2.drop(0)
+movie3
+
+tmp = movie.head(200)
+tmp
+for i in range(len(tmp)) :
+    if tmp.loc[i, '개봉일'] is not None:
+        if tmp.loc[i, '날짜'] > tmp.loc[i, '개봉일'] + timedelta(days=14) :
+            tmp.drop(i, inplace=True)
+tmp
+
+
+for i in range(len(movie)) :
+    if movie.loc[i, '개봉일'] is not None:
+        if movie.loc[i, '날짜'] > movie.loc[i, '개봉일'] + timedelta(days=14) :
+            movie.drop(i, inplace=True)
+
+else : #방법 na에 첫번째 날을 넣는다 그걸로 비교한다 첫날을 기억해야하는데
+    a = movie.loc[i, '날짜'] + timedelta(days=14)
+    if 영화인덱스가 같으면 같은 개봉일을 넣어
+
+같은 영화 인덱스에서 14개 넘으면 그 후를 지워....... 아니면 채워
+for i inrange(len(movie)):
+
+    while movie[i, "in"] == movie[i, "in"] and movie[i, "개봉"] is None :
+        a += 1
+
+        if a > 14  :
+            movie.drop(i, )
+
+#개수를 새고 15가 넘어가면 삭제할까?
+dups_count5 = movie.pivot_table(index=['movie_id.x.i .'], aggfunc='size')
+ggg= dups_count5[dups_count5>14]
+ggg.index
+for i in dups_count5[dups_count5>14].index :
+    movie
+movie.columns
+
+movie.loc[movie['movie_id.x.i.'] in dups_count5.index & movie['개봉일'] is None]
+movie.loc[movie['movie_id.x.i.'] == gg[1], "개봉일"].index[14:]
+gg= ggg.index
+gg = np.array(gg)
+gg[1]
+non_movie = movie[movie.개봉일 is None]
+dups_count5 = movie.pivot_table(index=['개봉일'], aggfunc='size')
+
+
+for i, v in enumerate(dups_count)
+    if movie.loc[movie['movie_id.x.i.'] == v,"개봉일"] == Nat:
+        a = movie.loc[movie['movie_id.x.i.'] == v, "개봉일"].index[14:]
+        movie.drop(a, inplace=True)
+
