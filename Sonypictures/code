@@ -1,0 +1,149 @@
+# Packages Download
+import pandas as pd
+import matplotlib.pyplot as plt
+#import re
+#import konlpy
+#from konlpy.tag import Okt
+#from tensorflow.keras.preprocessing.text import Tokenizer
+import numpy as np
+#from tensorflow.keras.preprocessing.sequence import pad_sequences
+import os
+import warnings
+import tensorflow as tf
+
+# ignore set
+warnings.filterwarnings(action='ignore')
+old_v = tf.logging.get_verbosity()
+tf.logging.set_verbosity(tf.logging.ERROR)
+
+# os set
+os.getcwd()
+
+
+
+# road data
+# 원본데이터
+movie = pd.read_csv(R"C:\Users\heon1\Desktop\kobis_join.csv", encoding='UTF-8')
+# 14일치 잘린데이터
+#movie = pd.read_csv(R"C:\Users\heon1\Desktop\movie2.csv", encoding='UTF-8')
+movie.columns
+
+# data view
+movie.describe()
+movie.shape
+movie.isna().sum()
+
+# na 관객수 643, 누적관객수 51
+# 영화명, 감독, 제작사, 수입사, 배급사, 개봉일, 장르, 관람등급, 영화구분, 외국영화 기본 13516개
+
+#########################################################################
+##4.	개봉일부터 2주차까지 짜르기
+##개봉일이 없다면 그냥 2주까지만 남기기
+##1.	categorical 변수에 대해서, 카테고리가 너무 많다면 cluster로 조금 줄여줘
+##2.	nomical 변수에 대해서 고려해야할 방안
+##  i.	 correlation을 통해서 중복성있는 데이터 삭제
+##  ii.	양으로 할지 증감율로 할지.
+##  iii.	Scale 조정 방법
+##3.	Na 처리
+#########################################################################
+
+
+# category 정리하기
+print(movie.head(5))
+movie.columns
+
+dummycolumns = ['외국영화', '영화구분', '관람등급', '장르', '배급사', '수입사', '제작사', '감독']
+
+for dim in dummycolumns : #개별 숫자까지 보는법
+    dups_count2 = movie.pivot_table(index=[dim], aggfunc='size')
+    print(dups_count2,"na %9d" %movie[dim].isna().sum(),  sep='\n')
+
+for dim in dummycolumns : #칼럼 별 숫자만 보는법
+    dups_count2 = movie.pivot_table(index=[dim], aggfunc='size')
+    print(dim , " : ", len(dups_count2))
+# clustering
+# 외국영화, 영화구분, 관람등급은 그냥 가능
+# 장르부터는 클러스터링 필요
+
+
+
+
+
+# how can we find 개봉일? # 1. 전날 대비 엄청 상승? or 좌석 점유율?
+
+## 4.	개봉일부터 2주차까지 짜르기
+## 개봉일이 없다면 그냥 2주까지만 남기기
+
+# 영화에 가서 그 영화 인덱스를 잡고 개봉날을 확인해 개봉날에서 14일이 넘어가는날이면 삭제해라
+# 만약 개봉일 있으면 14일치, 없으면 그냥
+
+# 1주일 이하 버리기 - 인덱스 수가 7이하인거 삭제
+# 인덱스 중복 수 세고
+
+dups_count = movie.pivot_table(index=['movie_id.x.i.'], aggfunc='size')
+print(dups_count.sort_values())
+
+
+
+# 2주차까지
+from datetime import datetime, timedelta
+movie['날짜'] = pd.to_datetime(movie['날짜'])
+movie['개봉일'] = pd.to_datetime(movie['개봉일'])
+movie.loc[0, '개봉일'] + timedelta(days=13)
+
+
+# 개봉일 있을떄
+for i in range(len(movie)) :
+    if movie.loc[i, '개봉일'] is not None:
+        if movie.loc[i, '날짜'] > movie.loc[i, '개봉일'] + timedelta(days=13) :
+            movie.drop(i, inplace=True)
+
+movie.shape
+movie.loc[movie['movie_id.x.i.']== 20113471 ]
+dups_count = movie.pivot_table(index=['movie_id.x.i.'], aggfunc='size')
+print(dups_count.sort_values())
+
+# to_csv + reset index
+#movie.to_csv(R"C:\Users\heon1\Desktop\movie2.csv",index = False, encoding = 'euc-kr')
+
+
+# 개봉일 없을때
+
+# 개수를 새고 15가 넘어가면 삭제할까?
+tmp_movie = movie.reset_index()
+tmp_movie.columns
+tmp_movie= tmp_movie.drop(['index'], axis=1)
+tmp_movie.columns
+dups_count5 = tmp_movie.pivot_table(index=['movie_id.x.i.'], aggfunc='size')
+ggg= dups_count5[dups_count5>14]
+ggg.index
+ggg.sort_values()
+
+gg= ggg.index
+gg = np.array(gg)
+gg[1]
+
+movie = tmp_movie
+movie.loc[movie['movie_id.x.i.'] in dups_count5.index & movie['개봉일'] is None]
+movie.loc[movie['movie_id.x.i.'] == gg[1], "개봉일"]
+
+dups_count5 = movie.pivot_table(index=['개봉일'], aggfunc='size')
+
+movie["개봉일"] = movie["개봉일"].fillna(2030-1-1)
+movie['개봉일'].isna().sum()
+movie['개봉일'] = pd.to_datetime(movie['개봉일'])
+movie['개봉일']
+
+gg[len(gg)]
+gg[0]
+for i in range(len(gg)):
+    if np.array(movie.loc[movie['movie_id.x.i.'] == gg[i],"개봉일"].head(1)) == 2028:
+        a = movie.loc[movie['movie_id.x.i.'] == gg[i], "개봉일"].index[14:]
+        movie.drop(a, inplace=True)
+
+movie.shape
+dups_count = movie.pivot_table(index=['movie_id.x.i.'], aggfunc='size')
+print(dups_count[dups_count>14])
+len(dups_count)
+
+
