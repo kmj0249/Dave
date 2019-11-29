@@ -24,7 +24,7 @@ os.getcwd()
 # road data
 # 원본데이터
 movie = pd.read_csv(R"C:\Users\heon1\Desktop\kobis_join.csv", encoding='UTF-8')
-# 14일치 ㅈ라린데티어
+# 14일치 잘린데이터
 #movie = pd.read_csv(R"C:\Users\heon1\Desktop\movie2.csv", encoding='UTF-8')
 movie.columns
 
@@ -53,7 +53,6 @@ print(movie.head(5))
 movie.columns
 
 dummycolumns = ['외국영화', '영화구분', '관람등급', '장르', '배급사', '수입사', '제작사', '감독']
-dups_count2 = movie.pivot_table(index=['외국영화'], aggfunc='size')
 
 for dim in dummycolumns : #개별 숫자까지 보는법
     dups_count2 = movie.pivot_table(index=[dim], aggfunc='size')
@@ -84,20 +83,13 @@ for dim in dummycolumns : #칼럼 별 숫자만 보는법
 dups_count = movie.pivot_table(index=['movie_id.x.i.'], aggfunc='size')
 print(dups_count.sort_values())
 
-# 여기서 7이하인거는 그 인덱스 삭제
-for i in range(len(movie)) :
-    if movie.loc[i, 'movie_id.x.i.'] in dups_count:
-        del movie[i, 'movie_id.x.i.']
-    else :
-        pass
 
 
 # 2주차까지
 from datetime import datetime, timedelta
 movie['날짜'] = pd.to_datetime(movie['날짜'])
 movie['개봉일'] = pd.to_datetime(movie['개봉일'])
-
-movie.loc[0, '개봉일'] + timedelta(days=14)
+movie.loc[0, '개봉일'] + timedelta(days=13)
 
 
 # 개봉일 있을떄
@@ -118,7 +110,6 @@ print(dups_count.sort_values())
 # 개봉일 없을때
 
 # 개수를 새고 15가 넘어가면 삭제할까?
-movie.columns
 tmp_movie = movie.reset_index()
 tmp_movie.columns
 tmp_movie= tmp_movie.drop(['index'], axis=1)
@@ -127,9 +118,6 @@ dups_count5 = tmp_movie.pivot_table(index=['movie_id.x.i.'], aggfunc='size')
 ggg= dups_count5[dups_count5>14]
 ggg.index
 ggg.sort_values()
-for i in dups_count5[dups_count5>14].index :
-    movie
-movie.columns
 
 gg= ggg.index
 gg = np.array(gg)
@@ -138,20 +126,14 @@ gg[1]
 movie = tmp_movie
 movie.loc[movie['movie_id.x.i.'] in dups_count5.index & movie['개봉일'] is None]
 movie.loc[movie['movie_id.x.i.'] == gg[1], "개봉일"]
-non_movie = movie[movie.개봉일 is None]
+
 dups_count5 = movie.pivot_table(index=['개봉일'], aggfunc='size')
 
 movie["개봉일"] = movie["개봉일"].fillna(2030-1-1)
 movie['개봉일'].isna().sum()
 movie['개봉일'] = pd.to_datetime(movie['개봉일'])
-movie2
-movie2['개봉일']
 movie['개봉일']
-movie[movie['movie_id.x.i.'] == gg[1]]["개봉일"] is None
-gg
-for i, v in enumerate(dups_count) :
-for i in gg:
-    print(gg)
+
 gg[len(gg)]
 gg[0]
 for i in range(len(gg)):
@@ -163,66 +145,5 @@ movie.shape
 dups_count = movie.pivot_table(index=['movie_id.x.i.'], aggfunc='size')
 print(dups_count[dups_count>14])
 len(dups_count)
-movie.loc[movie['movie_id.x.i.'] == gg[0], "개봉일"].head(1)
-gggggg= np.array(movie.loc[movie['movie_id.x.i.'] == gg[0], "개봉일"].head(1))
-gggggg
-a
-movie.loc[movie['movie_id.x.i.'] == i,"개봉일"] == 2028
-
-movie.loc[movie['movie_id.x.i.'] == gg[0],"개봉일"] == 2028
-
-
-movie.loc[0, '날짜'] + timedelta(days=14)
-
-movie.columns
-
-movie.loc[len(movie)-1,]
-
-if movie.loc[0, '개봉일'] is None:
-    movie.loc[0, "개봉일"] = movie.loc[i, "날짜"]
-    # 다음꺼랑 영화 인덱스가 같으면, 앞에 개봉일을 넣어줄까?
-# na인 곳에 개봉일을 먼저 만들어주자
-for i in range(len(movie)) :
-    if 개봉일이 없으면 개봉일 만들어주고
-        if 내일과 전날의 영화인덱스가 같으면
-            추가해줘
-
-movie.loc[21, '날짜'] > movie.loc[21, '개봉일'] + timedelta(days=14)
-movie2 = pd.DataFrame()
-movie2 = movie2.append(movie.loc[13])
-movie2.append(movie.loc[2])
-movie2
-movie.drop
-movie3 = movie2.drop(0)
-movie3
-
-tmp = movie.head(200)
-tmp
-for i in range(len(tmp)) :
-    if tmp.loc[i, '개봉일'] is not None:
-        if tmp.loc[i, '날짜'] > tmp.loc[i, '개봉일'] + timedelta(days=14) :
-            tmp.drop(i, inplace=True)
-
-
-
-for i in range(len(movie)) :
-    if movie.loc[i, '개봉일'] is not None:
-        if movie.loc[i, '날짜'] > movie.loc[i, '개봉일'] + timedelta(days=14) :
-            movie.drop(i, inplace=True)
-
-else : #방법 na에 첫번째 날을 넣는다 그걸로 비교한다 첫날을 기억해야하는데
-    a = movie.loc[i, '날짜'] + timedelta(days=14)
-    if 영화인덱스가 같으면 같은 개봉일을 넣어
-
-같은 영화 인덱스에서 14개 넘으면 그 후를 지워....... 아니면 채워
-for i inrange(len(movie)):
-
-    while movie[i, "in"] == movie[i, "in"] and movie[i, "개봉"] is None :
-        a += 1
-
-        if a > 14  :
-            movie.drop(i, )
-
-
 
 
